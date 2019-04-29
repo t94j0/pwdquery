@@ -61,3 +61,4 @@ ruby1
 | email      | TEXT |
 | hash       | TEXT |
 | password   | TEXT |
+| source     | TEXT |
