@@ -52,7 +52,7 @@ ruby1
 
 ## Tables
 
-_Dump_
+*Dump*
 
 | Column     | Type |
 |------------|------|
