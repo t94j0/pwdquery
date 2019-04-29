@@ -62,14 +62,14 @@ class Connection:
         self.address = accept[1]
         self.length = 0
 
-    def read_int(self):
+    def read_int(self) -> int:
         return struct.unpack('>I', self.conn.recv(4))[0]
 
-    def read_string(self, decode_method='utf-8'):
-        length = self.read_int()
+    def read_string(self, decode_method: str = 'utf-8', size: int = 0) -> str:
+        length = self.read_int() if size == 0 else size
         return self.conn.recv(length).decode(decode_method)
 
-    def send_string(self, data, encode_method='utf-8'):
+    def send_string(self, data: str, encode_method: str = 'utf-8') -> None:
         len_s = struct.pack('>I', len(data))
         self.conn.sendall(len_s)
         self.conn.sendall(data.encode(encode_method))
@@ -77,5 +77,10 @@ class Connection:
     def read_bool(self) -> bool:
         return struct.unpack('>?', self.conn.recv(1))[0]
 
-    def close(self):
+    def read_struct(self, pattern: str) -> str:
+        length = struct.calcsize(pattern)
+        data = self.conn.recv(length)
+        return struct.unpack(pattern, data)
+
+    def close(self) -> None:
         self.conn.close()

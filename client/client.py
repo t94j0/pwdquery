@@ -19,13 +19,14 @@ class PasswordClient:
     def dump(self, name: str, delimiter: str, skip_first: bool, columns,
              filename: str):
         self.socket.send_keep_going()
-        self.socket.send_header(2)
+        self.socket.send_int(2)
         data = struct.pack('>50sc?', name.encode('utf-8'), delimiter,
                            skip_first)
         self.socket.unsafe_send(data)
         cols = '\n'.join([f'{k}={v}' for k, v in columns.items()])
         self.socket.send(cols)
         for line in open(filename):
+            print(line)
             self.socket.send_hex(line)
         self.socket.send_keep_going(False)
 
