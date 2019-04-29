@@ -24,4 +24,3 @@ def create_db():
 
 
 create_db()
-print('Created database')
