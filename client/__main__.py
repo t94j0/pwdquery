@@ -1,3 +1,4 @@
+import sys
 import argparse
 
 from .client import PasswordClient
@@ -16,8 +17,17 @@ parser.add_argument(
 args = parser.parse_args()
 
 client = PasswordClient()
-passwords = client.get_passwords(args.identifier)
 
+if args.identifier == 'dump':
+    client.dump('mpgh', b'\x09', True, {
+        'identifier': 1,
+        'email': 2,
+        'hash': 4
+    }, './server/data/mpgh-net.2015.csv')
+    client.close()
+    sys.exit(0)
+
+passwords = client.get_passwords(args.identifier)
 if not args.quiet:
     print(f'Cracked passwords for {args.identifier}:')
 print(f'{passwords}')

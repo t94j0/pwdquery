@@ -22,7 +22,9 @@ class PasswordStore:
             email      TEXT,
             hash       TEXT,
             password   TEXT,
-            dump       TEXT
+            dump       TEXT,
+
+            UNIQUE (identifier, hash, password)
             )''')
         cur.close()
         self.conn.commit()
@@ -64,7 +66,7 @@ class PasswordStore:
         cur = self.conn.cursor()
         execute_values(
             cur,
-            'INSERT INTO dump(identifier, email, hash, password, dump) VALUES %s',
+            'INSERT INTO dump(identifier, email, hash, password, dump) VALUES %s ON CONFLICT DO NOTHING',
             self.insert_store)
         self.insert_store = []
         cur.close()
