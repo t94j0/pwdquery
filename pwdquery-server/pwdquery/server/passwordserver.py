@@ -1,11 +1,12 @@
 import csv
 import binascii
 
-from .router import Socket, Router, route
+from .socketserver import SocketServer
+from .router import Router, route
 from .store import PasswordStore, Password
 
 
-class Server(Socket):
+class Server(SocketServer):
     router = Router()
 
     def __init__(self, host='localhost', port=1234):
