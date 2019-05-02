@@ -31,11 +31,12 @@ class PasswordStore:
         self.conn.commit()
 
     def _increase_priority(self, ids):
+        ids = [(i, ) for i in ids]
         cur = self.conn.cursor()
-        execute_values(
-            cur,
-            'UPDATE dump SET priority = priority + 1 WHERE id = %s AND priority > 0',
-            ids)
+        for i in ids:
+            cur.execute(
+                'UPDATE dump SET priority = priority + 1 WHERE id = %s AND priority > 0',
+                i)
         cur.close()
         self.conn.commit()
 
@@ -60,10 +61,10 @@ class PasswordStore:
         cur = self.conn.cursor()
         cur.execute('SELECT id,password FROM dump WHERE identifier = %s',
                     (identifier, ))
+
         data = cur.fetchall()
         ids = [str(i[0]) for i in data]
-        passwords = [i[1] for i in data if i[1] != '']
-        self._increase_priority(ids)
+        passwords = [i[1] for i in data if i[1] != None]
 
         cur.close()
         return passwords
@@ -75,7 +76,7 @@ class PasswordStore:
 
         data = cur.fetchall()
         ids = [str(i[0]) for i in data]
-        hashes = [i[1] for i in data if i[1] != '']
+        hashes = [i[1] for i in data if i[1] != None]
         self._increase_priority(ids)
 
         cur.close()

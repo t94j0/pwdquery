@@ -16,13 +16,15 @@ class Server(SocketServer):
     @route(router, 0)
     def get_hashes(self, conn):
         identifier = conn.read_string()
-        data = '\n'.join(self.store.get_hashes(identifier))
+        hashes = self.store.get_hashes(identifier)
+        data = '\n'.join(hashes)
         conn.send_string(data)
 
     @route(router, 1)
     def get_passwords(self, conn):
         identifier = conn.read_string()
-        data = '\n'.join(self.store.get_passwords(identifier))
+        passwords = self.store.get_passwords(identifier)
+        data = '\n'.join(passwords)
         conn.send_string(data)
 
     @route(router, 2)
