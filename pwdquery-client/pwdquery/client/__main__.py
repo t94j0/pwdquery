@@ -24,7 +24,7 @@ def create_parser():
         action='store_true',
         default=False,
         help='Output quietly')
-    return parser.parse_args()
+    return parser
 
 
 def dir_input(title: str) -> str:
@@ -40,7 +40,8 @@ def dir_input(title: str) -> str:
 
 
 def main():
-    args = create_parser()
+    parser = create_parser()
+    args = parser.parse_args()
     client = PasswordClient()
 
     if args.csvdump:
@@ -67,6 +68,10 @@ def main():
         client.close()
 
         sys.exit(0)
+
+    if not args.identifier:
+        parser.print_usage()
+        sys.exit(1)
 
     passwords = client.get_passwords(args.identifier)
     if not args.quiet:

@@ -1,11 +1,7 @@
 import signal
 import sys
 
-print('Here!')
-
 from .passwordserver import Server
-
-print('There!')
 
 p = Server('localhost', 1234)
 

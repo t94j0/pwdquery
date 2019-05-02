@@ -12,27 +12,40 @@ class Connection:
         self._conn = conn
         self.address = address
 
+    def format_address(self) -> str:
+        return f'{self.address[0]}:{self.address[1]}'
+
+    def _recv(self, length: int) -> bytes:
+        data = self._conn.recv(length)
+        if length != 0 and len(data) == 0:
+            raise ConnectionError('Server closed connection')
+        return data
+
     def read_int(self) -> int:
-        return struct.unpack('>I', self._conn.recv(4))[0]
+        data = self._recv(4)
+        return struct.unpack('>I', data)[0]
 
     def read_bool(self) -> bool:
-        return struct.unpack('>?', self._conn.recv(1))[0]
+        data = self._recv(1)
+        return struct.unpack('>?', data)[0]
 
     def read_string(self, decode_method: str = 'utf-8', size: int = 0) -> str:
         length = self.read_int() if size == 0 else size
-        return self._conn.recv(length).decode(decode_method)
+        data = self._recv(length)
+        return data.decode(decode_method)
 
     def read_struct(self, pattern: str) -> Tuple:
         length = struct.calcsize(pattern)
-        data = self._conn.recv(length)
+        data = self._recv(length)
         return struct.unpack(pattern, data)
 
     def send_bool(self, data: bool) -> None:
-        header = struct.pack('>?', data)
+        data = struct.pack('>?', data)
+        self._conn.sendall(data)
 
     def send_int(self, data: int) -> None:
         header = struct.pack('>I', data)
-        self.s.sendall(header)
+        self._conn.sendall(header)
 
     def send_string(self, data: str, encode_method: str = 'utf-8') -> None:
         len_s = struct.pack('>I', len(data))

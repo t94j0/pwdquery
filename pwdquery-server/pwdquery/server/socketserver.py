@@ -1,5 +1,5 @@
 import socket
-from pwdquery.socket import Connection
+from pwdquery.socket import Connection, ConnectionError
 
 
 class SocketServer:
@@ -12,7 +12,14 @@ class SocketServer:
     def start(self):
         while True:
             conn = Connection(*self.socket.accept())
-            self._connection(conn)
+            address = conn.format_address()
+            print(f'Client {address} connected')
+            try:
+                self._connection(conn)
+                print('Client {address} closed session')
+                conn.close()
+            except ConnectionError:
+                print(f'Client {address} force closed the connection')
 
     def _connection(self, conn):
         while True:
@@ -22,7 +29,6 @@ class SocketServer:
 
             req_type = conn.read_int()
             self.router(self, req_type, conn)
-        conn.close()
 
     def close(self):
         self.socket.close()
