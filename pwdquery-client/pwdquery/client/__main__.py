@@ -26,6 +26,12 @@ def create_parser():
         default=False,
         help='Output quietly')
     parser.add_argument(
+        '--hash',
+        dest='hash',
+        action='store_true',
+        default=False,
+        help='Get hash')
+    parser.add_argument(
         '-c', '--config', default='', help='Location for configuration')
     return parser
 
@@ -52,11 +58,12 @@ def main():
         client = PasswordClient(host, port)
     except config.NoConfigurationError:
         print('Error: Unable to find configuration')
+        sys.exit(1)
     except ConnectionRefusedError:
         print('Error: Failed to connect to server')
+        sys.exit(1)
     except KeyError as e:
         print('Error: Key {e.args[0]} cannot be found')
-    finally:
         sys.exit(1)
 
     if args.csvdump:
@@ -91,11 +98,13 @@ def main():
     passwords = client.get_passwords(args.identifier)
     if not args.quiet:
         print(f'Cracked passwords for {args.identifier}:')
-    print(f'{passwords}')
+    if not args.hash:
+        print(f'{passwords}')
 
+    hashes = client.get_hashes(args.identifier)
     if not args.quiet:
-        hashes = client.get_hashes(args.identifier)
         print(f'Uncracked hashes for {args.identifier}:')
+    if not args.quiet or (args.quiet and args.hash):
         print(f'{hashes}')
     client.close()
 

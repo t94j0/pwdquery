@@ -47,15 +47,7 @@ def create_server(configpath: str) -> Server:
     return Server(lhost, lport, dbhost, dbport, dbname, dbuser, dbpassword)
 
 
-def sigint_handler(sig, frame):
-    logging.info('Stopping server')
-    p.close()
-    sys.exit()
-
-
 def main():
-    signal.signal(signal.SIGINT, sigint_handler)
-
     args = create_parser().parse_args()
     try:
         create_logger(args.log_path)
@@ -65,6 +57,14 @@ def main():
         sys.exit(1)
 
     logging.info('Starting server')
+
+    def sigint_handler(sig, frame):
+        logging.info('Stopping server')
+        p.close()
+        sys.exit()
+
+    signal.signal(signal.SIGINT, sigint_handler)
+
     p.start()
 
 
