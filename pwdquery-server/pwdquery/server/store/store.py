@@ -4,12 +4,15 @@ from .password import Password
 
 
 class PasswordStore:
-    def __init__(self, buf=10000):
+    def __init__(self,
+                 host: str,
+                 port: str,
+                 dbname: str,
+                 user: str,
+                 password: str,
+                 buf: int = 10000):
         self.conn = psycopg2.connect(
-            host='127.0.0.1',
-            user='passwords',
-            password='abc123!!!',
-            dbname='passwords')
+            host=host, port=port, user=user, password=password, dbname=dbname)
         self._create_db()
         self.buffer = buf
         self.insert_store = []
@@ -31,12 +34,11 @@ class PasswordStore:
         self.conn.commit()
 
     def _increase_priority(self, ids):
-        ids = [(i, ) for i in ids]
         cur = self.conn.cursor()
         for i in ids:
             cur.execute(
                 'UPDATE dump SET priority = priority + 1 WHERE id = %s AND priority > 0',
-                i)
+                (i, ))
         cur.close()
         self.conn.commit()
 
@@ -77,7 +79,7 @@ class PasswordStore:
         data = cur.fetchall()
         ids = [str(i[0]) for i in data]
         hashes = [i[1] for i in data if i[1] != None]
-        self._increase_priority(ids)
+        # self._increase_priority(ids)
 
         cur.close()
         return hashes

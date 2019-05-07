@@ -9,9 +9,10 @@ from .store import PasswordStore, Password
 class Server(SocketServer):
     router = Router()
 
-    def __init__(self, host='localhost', port=1234):
-        super().__init__(host, port)
-        self.store = PasswordStore()
+    def __init__(self, lhost: str, lport: int, dbhost: str, dbport: int,
+                 dbname: str, dbuser: str, dbpassword: str):
+        super().__init__(lhost, lport)
+        self.store = PasswordStore(dbhost, dbport, dbname, dbuser, dbpassword)
 
     @route(router, 0)
     def get_hashes(self, conn):

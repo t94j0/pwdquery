@@ -2,6 +2,7 @@ import sys
 import argparse
 
 from .client import PasswordClient
+from . import config
 
 
 def create_parser():
@@ -24,6 +25,8 @@ def create_parser():
         action='store_true',
         default=False,
         help='Output quietly')
+    parser.add_argument(
+        '-c', '--config', default='', help='Location for configuration')
     return parser
 
 
@@ -42,7 +45,19 @@ def dir_input(title: str) -> str:
 def main():
     parser = create_parser()
     args = parser.parse_args()
-    client = PasswordClient()
+    try:
+        cfg = config.get(args.config)
+        host = cfg['host']
+        port = cfg['port']
+        client = PasswordClient(host, port)
+    except config.NoConfigurationError:
+        print('Error: Unable to find configuration')
+    except ConnectionRefusedError:
+        print('Error: Failed to connect to server')
+    except KeyError as e:
+        print('Error: Key {e.args[0]} cannot be found')
+    finally:
+        sys.exit(1)
 
     if args.csvdump:
         location = dir_input('CSV Dump: ')

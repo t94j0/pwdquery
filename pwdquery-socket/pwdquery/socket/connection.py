@@ -57,7 +57,7 @@ class Connection:
             if type(a) == str:
                 raise ConnectionError(
                     'Data passed to send_struct should be a byte object')
-        data = struct.pack(pattern, data.encode(encode_method))
+        data = struct.pack(pattern, *args)
         self._conn.sendall(data)
 
     def send_hex(self, data: str, encode_method: str = 'utf-8') -> None:
