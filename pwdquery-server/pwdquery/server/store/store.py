@@ -6,7 +6,7 @@ from .password import Password
 class PasswordStore:
     def __init__(self,
                  host: str,
-                 port: str,
+                 port: int,
                  dbname: str,
                  user: str,
                  password: str,

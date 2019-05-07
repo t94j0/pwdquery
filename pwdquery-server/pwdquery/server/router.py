@@ -1,4 +1,5 @@
 from functools import wraps
+from typing import Dict
 
 
 def route(router: 'Router', index: int):
@@ -15,7 +16,7 @@ def route(router: 'Router', index: int):
 
 
 class Router:
-    commands = {}
+    commands: Dict = {}
 
     def add(self, index, func):
         self.commands[index] = func

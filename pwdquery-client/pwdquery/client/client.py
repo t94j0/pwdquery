@@ -20,7 +20,7 @@ class PasswordClient:
         return self._command(1, identifier)
 
     def get_identifier(self, password: str):
-        self._command(3, identifier)
+        self._command(3, password)
 
     def dump(self, name: str, delimiter: str, skip_first: bool, columns,
              filename: str):

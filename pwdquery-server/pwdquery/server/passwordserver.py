@@ -35,8 +35,6 @@ class Server(SocketServer):
         dump_name = dump_name.decode('utf-8').replace('\0', '')
         delimiter = delimiter.decode('utf-8')
 
-        print(f'Got dump: {dump_name}')
-
         # Get columns
         col_desc = conn.read_string().split('\n')
         columns = {c.split('=')[0]: int(c.split('=')[1]) for c in col_desc}
@@ -46,7 +44,6 @@ class Server(SocketServer):
         if skip_first:
             next(reader)
         for row in reader:
-            print(row)
             pwd_args = {k: row[v] for k, v in columns.items() if v < len(row)}
             p = Password(dump=dump_name, **pwd_args)
             self.store.insert(p)
