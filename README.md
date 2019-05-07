@@ -1,4 +1,4 @@
-# Password Storage
+# pwdquery
 
 Features:
 * Stores password dumps for easy wins.
@@ -43,7 +43,7 @@ password
 ruby1
 ```
 
-* `pwdquery -q --uncracked [identifier]`
+* `pwdquery -q --hash [identifier]`
 
 ```
 09f7e02f1290be211da707a266f153b3
