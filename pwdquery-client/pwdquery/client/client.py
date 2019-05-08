@@ -17,7 +17,9 @@ class PasswordClient:
         return self._command(0, identifier)
 
     def get_passwords(self, identifier: str):
-        return self._command(1, identifier)
+        passwords = [l for l in self._command(1, identifier).split('\n')]
+        passwords = [l for l in passwords if l != '']
+        return '\n'.join(passwords)
 
     def get_identifier(self, password: str):
         self._command(3, password)

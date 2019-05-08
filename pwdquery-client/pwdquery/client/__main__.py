@@ -99,13 +99,13 @@ def main():
     if not args.quiet:
         print(f'Cracked passwords for {args.identifier}:')
     if not args.hash:
-        print(f'{passwords}')
+        print(passwords)
 
     hashes = client.get_hashes(args.identifier)
     if not args.quiet:
         print(f'Uncracked hashes for {args.identifier}:')
     if not args.quiet or (args.quiet and args.hash):
-        print(f'{hashes}')
+        print(hashes)
     client.close()
 
 
