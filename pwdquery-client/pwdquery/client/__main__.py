@@ -25,7 +25,7 @@ def create_parser():
         dest='hash',
         action='store_true',
         default=False,
-        help='Get hash')
+        help='Only display hash')
     parser.add_argument(
         '-p',
         '--password',
@@ -74,7 +74,7 @@ def main():
 
     if not args.password:
         passwords = client.get_passwords(args.identifier)
-        if not args.quiet:
+        if not args.quiet and not args.hash:
             print(f'Cracked passwords for {args.identifier}:')
         if not args.hash:
             print(passwords)
