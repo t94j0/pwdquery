@@ -21,6 +21,8 @@ def create_parser():
         default=False,
         help='Output quietly')
     parser.add_argument(
+        '--csv-dump', dest='csvdump', default='', type=str, help='Upload CSV')
+    parser.add_argument(
         '--hash',
         dest='hash',
         action='store_true',
@@ -67,11 +69,27 @@ def main():
         print('Error: Key {e.args[0]} cannot be found')
         sys.exit(1)
 
-    if not args.identifier:
+    if not args.identifier and not args.csvdump:
         parser.print_usage()
         sys.exit(1)
 
-    if not args.password:
+    if args.csvdump:
+        name = input('Site name [kebab-case]: ')
+        decimal_delimit = int(input('Delimiter [decimal] (,): ') or '44')
+        skip_first = input('Skip first entry? (y/N)') in ['Y', 'y']
+        print(
+            '\nColumn selection\nFormat: \'column_name index\'. Double enter when complete'
+        )
+        indicies = {}
+        while True:
+            inp = input()
+            if inp == '':
+                break
+            column_name, index = inp.split(' ')
+            indicies[column_name] = int(index)
+        client.dump(args.csvdump, name, decimal_delimit, skip_first, indicies)
+        sys.exit(0)
+    elif not args.password:
         passwords = '\n'.join(client.get_passwords(args.identifier))
         if not args.quiet and not args.hash:
             print(f'Cracked passwords for {args.identifier}:')
@@ -83,7 +101,7 @@ def main():
             print(f'Uncracked hashes for {args.identifier}:')
         if not args.quiet or (args.quiet and args.hash):
             print(hashes)
-    else:
+    elif args.password:
         if not args.quiet:
             print(f'Identifiers related to password {args.identifier}:')
         identifers = '\n'.join(client.get_identifiers(args.identifier))

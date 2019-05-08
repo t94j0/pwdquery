@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	cloud.google.com/go v0.38.0 // indirect
+	github.com/eapache/channels v1.1.0
 	github.com/gin-gonic/gin v1.4.0 // indirect
 	github.com/golang/mock v1.3.0 // indirect
 	github.com/google/btree v1.0.0 // indirect

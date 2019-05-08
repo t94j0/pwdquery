@@ -1,6 +1,8 @@
 package store
 
 import (
+	"github.com/eapache/channels"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -17,15 +19,33 @@ type Dump struct {
 
 type DB struct {
 	*gorm.DB
+	insertChan *channels.InfiniteChannel
+	errors     []error
 }
 
-func New() (*DB, error) {
+func New(workers int) (*DB, error) {
 	db, err := gorm.Open("postgres", "host=localhost port=5432 user=passwords dbname=passwords password=abc123!!! sslmode=disable")
 	if err != nil {
 		return nil, err
 	}
 	db.AutoMigrate(&Dump{})
-	return &DB{db}, nil
+	insertChan := channels.NewInfiniteChannel()
+	d := &DB{db, insertChan, make([]error, 0)}
+
+	for i := 0; i < workers; i++ {
+		go d.insertWorker(insertChan.Out())
+	}
+
+	return d, nil
+}
+
+func (db *DB) insertWorker(insertChan <-chan interface{}) {
+	for dumpI := range insertChan {
+		dump, _ := dumpI.(Dump)
+		if err := db.Create(&dump).Error; err != nil {
+			db.errors = append(db.errors, err)
+		}
+	}
 }
 
 func (db *DB) increasePriority(ids []uint) error {
@@ -84,6 +104,10 @@ func (db *DB) GetIdentifiers(password string) ([]string, error) {
 		identifiers = append(identifiers, o.Identifier)
 	}
 	return identifiers, nil
+}
+
+func (db *DB) Insert(val Dump) {
+	db.insertChan.In() <- val
 }
 
 func (db *DB) Close() {
