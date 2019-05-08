@@ -14,11 +14,6 @@ def create_parser():
         type=str,
         help='Identifier to get passwords from')
     parser.add_argument(
-        '--csv-dump',
-        dest='csvdump',
-        action='store_true',
-        help='Identifier to get passwords from')
-    parser.add_argument(
         '-q',
         '--quiet',
         dest='quiet',
@@ -72,31 +67,6 @@ def main():
     except KeyError as e:
         print('Error: Key {e.args[0]} cannot be found')
         sys.exit(1)
-
-    if args.csvdump:
-        location = dir_input('CSV Dump: ')
-        name = input('Site name [kebab-case]: ')
-        year = input('Leak Year: ')
-        decimal_delimit = bytes(
-            [int(input('Delimiter [decimal] (,): ') or '44')])
-        skip_first = input('Skip first entry? (y/N)') in ['Y', 'y']
-        print(
-            '\nColumn selection\nFormat: \'column_name index\'. Double enter when complete'
-        )
-        indicies = {}
-        while True:
-            inp = input()
-            if inp == '':
-                break
-            column_name, index = inp.split(' ')
-            indicies[column_name] = int(index)
-        name = f'{name}.{year}'
-
-        print('Starting transfer')
-        client.dump(name, decimal_delimit, skip_first, indicies, location)
-        client.close()
-
-        sys.exit(0)
 
     if not args.identifier:
         parser.print_usage()

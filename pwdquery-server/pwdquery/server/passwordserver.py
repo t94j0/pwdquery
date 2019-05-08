@@ -35,31 +35,10 @@ class Server(SocketServer):
         data = '\n'.join(identifers)
         conn.send_string(data)
 
-    @route(router, 3)
-    def dump(self, conn):
-        # Get parameters
-        dump_name, delimiter, skip_first = conn.read_struct('>50sc?')
-        dump_name = dump_name.decode('utf-8').replace('\0', '')
-        delimiter = delimiter.decode('utf-8')
-
-        # Get columns
-        col_desc = conn.read_string().split('\n')
-        columns = {c.split('=')[0]: int(c.split('=')[1]) for c in col_desc}
-
-        csvfile = (x.replace('\0', '') for x in self.getcsv(conn))
-        reader = csv.reader(csvfile, delimiter=delimiter)
-        if skip_first:
-            next(reader)
-        for row in reader:
-            pwd_args = {k: row[v] for k, v in columns.items() if v < len(row)}
-            p = Password(dump=dump_name, **pwd_args)
-            self.store.insert(p)
-        self.store.flush()
-
     def getcsv(self, conn):
         while True:
             length = conn.read_int()
             if length == 0:
                 break
-            data = conn.read_string(size=length)
-            yield binascii.unhexlify(data).decode('utf-8')
+            print(f'len: {length}')
+            yield conn.read_hex(size=length)

@@ -24,18 +24,6 @@ class PasswordClient:
     def get_identifiers(self, password: str):
         return self._command(2, password)
 
-    def dump(self, name: str, delimiter: str, skip_first: bool, columns,
-             filename: str):
-        self._conn.send_bool(True)
-        self._conn.send_int(3)
-        self._conn.send_struct('>50sc?', name.encode('utf-8'), delimiter,
-                               skip_first)
-        cols = '\n'.join([f'{k}={v}' for k, v in columns.items()])
-        self._conn.send_string(cols)
-        for line in open(filename):
-            self._conn.send_hex(line)
-        self._conn.send_bool(False)
-
     def close(self):
         self._conn.close()
 

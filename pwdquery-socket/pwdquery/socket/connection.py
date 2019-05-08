@@ -39,6 +39,11 @@ class Connection:
         data = self._recv(length)
         return struct.unpack(pattern, data)
 
+    def read_hex(self, size: int, decode_method: str = 'utf-8') -> str:
+        raw_data = self._recv(size)
+        clean = binascii.unhexlify(raw_data).decode(decode_method)
+        return clean
+
     def send_bool(self, data: bool) -> None:
         data = struct.pack('>?', data)
         self._conn.sendall(data)
@@ -62,6 +67,7 @@ class Connection:
 
     def send_hex(self, data: str, encode_method: str = 'utf-8') -> None:
         hexed_data = binascii.hexlify(data.encode(encode_method))
+        print(f'Sending: {len(hexed_data)}')
         self.send_int(len(hexed_data))
         self._conn.sendall(hexed_data)
 
