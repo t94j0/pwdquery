@@ -1,31 +1,16 @@
-import struct
-
-from .create_connection import create_connection
+import requests
+from typing import List
 
 
 class PasswordClient:
-    def __init__(self, host='localhost', port=1234):
-        self._conn = create_connection(host, port)
+    def __init__(self, host: str = 'http://localhost:1234'):
+        self.host = host
 
-    def _command(self, tid: int, data: str) -> None:
-        self._conn.send_bool(True)
-        self._conn.send_int(tid)
-        self._conn.send_string(data)
-        return self._conn.read_string()
-
-    def get_hashes(self, identifier: str):
-        return self._command(0, identifier)
+    def get_hashes(self, identifier: str) -> List[str]:
+        return requests.get(f'{self.host}/hashes/{identifier}').json()
 
     def get_passwords(self, identifier: str):
-        passwords = [l for l in self._command(1, identifier).split('\n')]
-        passwords = [l for l in passwords if l != '']
-        return '\n'.join(passwords)
+        return requests.get(f'{self.host}/passwords/{identifier}').json()
 
     def get_identifiers(self, password: str):
-        return self._command(2, password)
-
-    def close(self):
-        self._conn.close()
-
-    def __exit__(self):
-        self.close()
+        return requests.get(f'{self.host}/identifiers/{password}').json()

@@ -56,8 +56,7 @@ def main():
     try:
         cfg = config.get(args.config)
         host = cfg['host']
-        port = cfg['port']
-        client = PasswordClient(host, port)
+        client = PasswordClient(host)
     except config.NoConfigurationError:
         print('Error: Unable to find configuration')
         sys.exit(1)
@@ -73,13 +72,13 @@ def main():
         sys.exit(1)
 
     if not args.password:
-        passwords = client.get_passwords(args.identifier)
+        passwords = '\n'.join(client.get_passwords(args.identifier))
         if not args.quiet and not args.hash:
             print(f'Cracked passwords for {args.identifier}:')
         if not args.hash:
             print(passwords)
 
-        hashes = client.get_hashes(args.identifier)
+        hashes = '\n'.join(client.get_hashes(args.identifier))
         if not args.quiet:
             print(f'Uncracked hashes for {args.identifier}:')
         if not args.quiet or (args.quiet and args.hash):
@@ -87,10 +86,8 @@ def main():
     else:
         if not args.quiet:
             print(f'Identifiers related to password {args.identifier}:')
-        identifers = client.get_identifiers(args.identifier)
+        identifers = '\n'.join(client.get_identifiers(args.identifier))
         print(identifers)
-
-    client.close()
 
 
 if __name__ == '__main__':
