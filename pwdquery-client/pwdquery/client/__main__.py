@@ -32,6 +32,13 @@ def create_parser():
         default=False,
         help='Get hash')
     parser.add_argument(
+        '-p',
+        '--password',
+        dest='password',
+        action='store_true',
+        default=False,
+        help='Search based on password')
+    parser.add_argument(
         '-c', '--config', default='', help='Location for configuration')
     return parser
 
@@ -95,17 +102,24 @@ def main():
         parser.print_usage()
         sys.exit(1)
 
-    passwords = client.get_passwords(args.identifier)
-    if not args.quiet:
-        print(f'Cracked passwords for {args.identifier}:')
-    if not args.hash:
-        print(passwords)
+    if not args.password:
+        passwords = client.get_passwords(args.identifier)
+        if not args.quiet:
+            print(f'Cracked passwords for {args.identifier}:')
+        if not args.hash:
+            print(passwords)
 
-    hashes = client.get_hashes(args.identifier)
-    if not args.quiet:
-        print(f'Uncracked hashes for {args.identifier}:')
-    if not args.quiet or (args.quiet and args.hash):
-        print(hashes)
+        hashes = client.get_hashes(args.identifier)
+        if not args.quiet:
+            print(f'Uncracked hashes for {args.identifier}:')
+        if not args.quiet or (args.quiet and args.hash):
+            print(hashes)
+    else:
+        if not args.quiet:
+            print(f'Identifiers related to password {args.identifier}:')
+        identifers = client.get_identifiers(args.identifier)
+        print(identifers)
+
     client.close()
 
 

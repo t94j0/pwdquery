@@ -29,6 +29,13 @@ class Server(SocketServer):
         conn.send_string(data)
 
     @route(router, 2)
+    def get_identifers(self, conn):
+        password = conn.read_string()
+        identifers = self.store.get_identifiers(password)
+        data = '\n'.join(identifers)
+        conn.send_string(data)
+
+    @route(router, 3)
     def dump(self, conn):
         # Get parameters
         dump_name, delimiter, skip_first = conn.read_struct('>50sc?')

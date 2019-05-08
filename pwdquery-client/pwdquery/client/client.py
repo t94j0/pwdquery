@@ -21,13 +21,13 @@ class PasswordClient:
         passwords = [l for l in passwords if l != '']
         return '\n'.join(passwords)
 
-    def get_identifier(self, password: str):
-        self._command(3, password)
+    def get_identifiers(self, password: str):
+        return self._command(2, password)
 
     def dump(self, name: str, delimiter: str, skip_first: bool, columns,
              filename: str):
         self._conn.send_bool(True)
-        self._conn.send_int(2)
+        self._conn.send_int(3)
         self._conn.send_struct('>50sc?', name.encode('utf-8'), delimiter,
                                skip_first)
         cols = '\n'.join([f'{k}={v}' for k, v in columns.items()])
