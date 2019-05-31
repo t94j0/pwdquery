@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -20,7 +20,9 @@ func hashesHandler(c *gin.Context) {
 	identifier := c.Param("identifier")
 	hashes, err := db.GetHashes(identifier)
 	if err != nil {
-		panic(err)
+		log.Print("Error getting hashes: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		return
 	}
 	c.JSON(http.StatusOK, hashes)
 }
@@ -29,7 +31,9 @@ func passwordsHandler(c *gin.Context) {
 	identifier := c.Param("identifier")
 	passwords, err := db.GetPasswords(identifier)
 	if err != nil {
-		panic(err)
+		log.Print("Error getting hashes: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		return
 	}
 	c.JSON(http.StatusOK, passwords)
 }
@@ -38,22 +42,28 @@ func identifiersHandler(c *gin.Context) {
 	password := c.Param("password")
 	identifiers, err := db.GetIdentifiers(password)
 	if err != nil {
-		panic(err)
+		log.Print("Error getting identifiers: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		return
 	}
 	c.JSON(http.StatusOK, identifiers)
 }
 
 func uploadCSVHandler(c *gin.Context) {
 	name, _ := c.GetPostForm("name")
+	// Get delimiter as integer
 	delimiterS, _ := c.GetPostForm("delimiter")
-	fmt.Println("Delim:", delimiterS)
 	delimiter, err := strconv.Atoi(delimiterS)
 	if err != nil {
-		panic(err)
+		log.Print("Error converting delimiter: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		return
 	}
+	// Get skip as boolean
 	skipFirstS, _ := c.GetPostForm("skip")
 	skipFirst := skipFirstS == "true"
 
+	// Get index values as struct
 	type index struct {
 		Identifier int
 		Email      int
@@ -63,19 +73,24 @@ func uploadCSVHandler(c *gin.Context) {
 	var indicies index
 	indiciesS, _ := c.GetPostForm("indicies")
 	if err := json.Unmarshal([]byte(indiciesS), &indicies); err != nil {
-		panic(err)
+		log.Print("Error marshalling JSON: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		return
 	}
-	fmt.Println(indicies)
 
+	// Get file
 	filename, err := c.FormFile("file")
 	if err != nil {
-		panic(err)
+		log.Print("Error getting file: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		return
 	}
 	file, err := filename.Open()
 	if err != nil {
-		panic(err)
+		log.Print("Error opening file: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		return
 	}
-	fmt.Println(name)
 
 	// Expected array length
 	scanner := bufio.NewScanner(file)
@@ -95,6 +110,7 @@ func uploadCSVHandler(c *gin.Context) {
 			continue
 		}
 		dump := store.Dump{
+			DumpID:     name,
 			Identifier: entries[indicies.Identifier],
 			Email:      entries[indicies.Email],
 			Hash:       entries[indicies.Hash],
@@ -103,7 +119,9 @@ func uploadCSVHandler(c *gin.Context) {
 		db.Insert(dump)
 	}
 	if err := scanner.Err(); err != nil {
-		panic(err)
+		log.Print("Error in scanner:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server error"})
+		return
 	}
 	c.JSON(http.StatusOK, "")
 }
@@ -117,7 +135,8 @@ func main() {
 
 	db, err = store.New(25)
 	if err != nil {
-		panic(err)
+		log.Panic("Error creating store: ", err)
+		return
 	}
 	defer db.Close()
 
@@ -126,6 +145,6 @@ func main() {
 	r.GET("/identifiers/:password", identifiersHandler)
 	r.POST("/upload-csv", uploadCSVHandler)
 
-	fmt.Println("Listening on port 1234")
+	log.Print("Listening on port 1234")
 	r.Run(":1234")
 }
